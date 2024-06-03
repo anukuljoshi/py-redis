@@ -48,9 +48,9 @@ class TestRESPParser(unittest.TestCase):
             ":123\r\n",
             ":1a5\r\n",
             # bool
-            "#t",
-            "#f",
-            "#j",
+            "#t\r\n",
+            "#f\r\n",
+            "#j\r\n",
             # simple strings
             "+abcd\r\n",
             "+hello\r\n",
