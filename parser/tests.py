@@ -61,6 +61,8 @@ class TestRESPParser(unittest.TestCase):
             # list
             "*3\r\n:12\r\n#t\r\n+hello\r\n",
             "*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n*3\r\n:-10\r\n$5\r\nvalue\r\n#t\r\n",
+            "*3\r\n*2\r\n*1\r\n:1\r\n*3\r\n#t\r\n:25\r\n+hello 123 world\r\n*1\r\n$7\r\nhello\r\n\r\n*3\r\n:-40\r\n+50\r\n:+60\r\n",
+            "*1\r\n*2\r\n*1\r\n*1\r\n:1\r\n:12\r\n",
         ]
         expected_outputs = [
             5,
@@ -76,6 +78,16 @@ class TestRESPParser(unittest.TestCase):
             "hello\r\ntest",
             [12, True, "hello"],
             ["SET", "key", [-10, "value", True]],
+            [
+                [[1], [True, 25, "hello 123 world"]],
+                ["hello\r\n"],
+                [-40, "50", 60],
+            ],
+            [
+                [
+                    [[1]],  12
+                ]
+            ]
         ]
 
         if len(inputs) != len(expected_outputs):
