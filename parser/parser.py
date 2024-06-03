@@ -67,14 +67,50 @@ class Decoder:
             self.readChar()
 
         self.readChar()
+        self.readChar()
 
         length = int(length)
-        result = [None]*length
+        result = []
 
-        # i = 0
-        # while i < length:
-        #     result[i] = self.decode()
-        #     i += 1
+        for _ in range(length):
+            next_char = self.char
+
+            item = None
+            if next_char == TYPE_PREFIX.INTEGERS.value:
+                # int
+                self.readChar()
+                item = self.__decode_int()
+                self.readChar()
+                self.readChar()
+            elif next_char == TYPE_PREFIX.BOOLEAN.value:
+                # bool
+                self.readChar()
+                item = self.__decode_bool()
+                self.readChar()
+                self.readChar()
+            elif next_char == TYPE_PREFIX.BULK_STRING.value:
+                # string
+                self.readChar()
+                item = self.__decode_bulk_string()
+                self.readChar()
+                self.readChar()
+            elif next_char == TYPE_PREFIX.SIMPLE_STRING.value:
+                # string
+                self.readChar()
+                item = self.__decode_simple_string()
+                self.readChar()
+                self.readChar()
+            elif next_char == TYPE_PREFIX.ARRAY.value:
+                # list
+                # start of length integer
+                self.readChar()
+                item = self.__decode_array()
+            elif next_char == "\r" and self.peekNextChar() == "\n":
+                # skip two character \r\n
+                self.readChar()
+                self.readChar()
+
+            result.append(item)
 
         return result
 
@@ -193,7 +229,6 @@ class Decoder:
             self.readChar()
         elif self.char == TYPE_PREFIX.ARRAY.value:
             # list
-            # start of length integer
             self.readChar()
             result = self.__decode_array()
         elif self.char == "\r" and self.peekNextChar() == "\n":
