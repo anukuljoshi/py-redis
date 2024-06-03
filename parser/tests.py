@@ -65,10 +65,10 @@ class TestRESPParser(unittest.TestCase):
         expected_outputs = [
             5,
             123,
-            "exception",
+            "ParserException",
             True,
             False,
-            "exception",
+            "ParserException",
             "abcd",
             "hello",
             "abcd",
@@ -83,7 +83,7 @@ class TestRESPParser(unittest.TestCase):
             return
 
         for i in range(len(inputs)):
-            if expected_outputs[i] == "exception":
+            if expected_outputs[i] == "ParserException":
                 self.assertRaises(ParserException, parser.decode, inputs[i])
             else:
                 output = parser.decode(inputs[i])
