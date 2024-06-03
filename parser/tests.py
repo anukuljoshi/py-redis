@@ -51,10 +51,16 @@ class TestRESPParser(unittest.TestCase):
             "#t",
             "#f",
             "#j",
-            # strings
+            # simple strings
+            "+abcd\r\n",
+            "+hello\r\n",
+            # bulk strings
             "$4\r\nabcd\r\n",
             "$11\r\nhello world\r\n",
+            "$11\r\nhello\r\ntest\r\n",
             # list
+            "*3\r\n:12\r\n#t\r\n+hello\r\n",
+            "*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n*3\r\n:-10\r\n$5\r\nvalue\r\n#t\r\n",
         ]
         expected_outputs = [
             5,
@@ -64,7 +70,12 @@ class TestRESPParser(unittest.TestCase):
             False,
             "exception",
             "abcd",
+            "hello",
+            "abcd",
             "hello world",
+            "hello\r\ntest",
+            [12, True, "hello"],
+            ["SET", "key", [-10, "value", True]],
         ]
 
         if len(inputs) != len(expected_outputs):
