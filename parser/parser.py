@@ -110,8 +110,10 @@ class Decoder:
         """
 
         if self.char == "t":
+            self.readChar()
             return True
         elif self.char == "f":
+            self.readChar()
             return False
 
         raise ParserException(f"Unexpected {self.char}", self.current)
