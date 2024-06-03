@@ -225,8 +225,50 @@ class Decoder:
         return result
 
 
+class Encoder:
+    def __encode_int(self, command: int) -> str:
+        return f"{TYPE_PREFIX.INTEGERS.value}{command}\r\n"
+
+    def __encode_bool(self, command: bool) -> str:
+        return f"{TYPE_PREFIX.BOOLEAN.value}{'t' if command else 'f'}\r\n"
+
+    def __encode_simple_string(self, command: str) -> str:
+        return f"{TYPE_PREFIX.SIMPLE_STRING.value}{command}\r\n"
+
+    def __encode_bulk_string(self, command: str) -> str:
+        return f"{TYPE_PREFIX.BULK_STRING.value}{len(command)}\r\n{command}\r\n"
+
+    def __encode_array(self, commands: List[Any]) -> str:
+        result = [f"{TYPE_PREFIX.ARRAY.value}{len(commands)}\r\n"]
+        for command in commands:
+            result.append(self.encode(command))
+        return "".join(result)
+
+    def encode(self, command: Any) -> str:
+        result = []
+
+        if type(command) is type(1):
+            # int
+            result.append(self.__encode_int(command))
+        elif type(command) is type(True):
+            # boolean
+            result.append(self.__encode_bool(command))
+        elif type(command) is type(""):
+            if "\r" in command or "\n" in command:
+                # bulk string
+                result.append(self.__encode_bulk_string(command))
+            else:
+                # simple string
+                result.append(self.__encode_simple_string(command))
+        elif type(command) is type([]):
+            # list
+            result.append(self.__encode_array(command))
+
+        return "".join(result)
+
+
 class RESPParser:
-    def encode(self, commands: List[Any]) -> str:
+    def encode(self, commands: Any) -> str:
         """encode a list of command
 
             supported types: int, bool, str, list
@@ -236,36 +278,8 @@ class RESPParser:
         Returns:
             RESP encoded string
         """
-        response = [f"{TYPE_PREFIX.ARRAY.value}{len(commands)}\r\n"]
-
-        for command in commands:
-            if type(command) is type(""):
-                response.append(
-                    f"{TYPE_PREFIX.BULK_STRING.value}{len(command)}\r\n"
-                )
-                response.append(f"{command}\r\n")
-                # # divide into simple and bulk string
-                # if "\r" in command or "\n" in command:
-                #     response.append(
-                #         f"{TYPE_PREFIX.BULK_STRING.value}{len(command)}\r\n"
-                #     )
-                #     response.append(f"{command}\r\n")
-                # else:
-                #     response.append(
-                #         f"{TYPE_PREFIX.SIMPLE_STRING.value}{command}\r\n"
-                #     )
-            elif type(command) is type(1):
-                response.append(
-                    f"{TYPE_PREFIX.INTEGERS.value}{command}\r\n"
-                )
-            elif type(command) is type(True):
-                response.append(
-                    f"{TYPE_PREFIX.BOOLEAN.value}{'t' if command else 'f'}\r\n"
-                )
-            elif type(command) is type([]):
-                response.append(self.encode(command))
-
-        return "".join(response)
+        encoder = Encoder()
+        return encoder.encode(commands)
 
     def decode(self, string: str):
         decoder = Decoder(string)

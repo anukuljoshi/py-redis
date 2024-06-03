@@ -10,6 +10,21 @@ class TestRESPParser(unittest.TestCase):
         parser = RESPParser()
 
         inputs = [
+            # int
+            10,
+            -100,
+            +50,
+            # bool
+            True,
+            False,
+            # simple string
+            "foo",
+            "bar",
+            "12345",
+            # bulk string
+            "hello\r\nworld",
+            "\r\n",
+            # list
             ["ECHO", "hello"],
             ["SET", "mykey", "foo"],
             ["GET", "mykey"],
@@ -19,13 +34,28 @@ class TestRESPParser(unittest.TestCase):
             ["SET", "key", [-10, "value", True]],
         ]
         expected_outputs = [
-            "*2\r\n$4\r\nECHO\r\n$5\r\nhello\r\n",
-            "*3\r\n$3\r\nSET\r\n$5\r\nmykey\r\n$3\r\nfoo\r\n",
-            "*2\r\n$3\r\nGET\r\n$5\r\nmykey\r\n",
-            "*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n:1\r\n",
-            "*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n:-10\r\n",
-            "*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n#t\r\n",
-            "*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n*3\r\n:-10\r\n$5\r\nvalue\r\n#t\r\n",
+            # int
+            ":10\r\n",
+            ":-100\r\n",
+            ":50\r\n",
+            # bool
+            "#t\r\n",
+            "#f\r\n",
+            # simple string
+            "+foo\r\n",
+            "+bar\r\n",
+            "+12345\r\n",
+            # bulk string
+            "$12\r\nhello\r\nworld\r\n",
+            "$2\r\n\r\n\r\n",
+            # array
+            "*2\r\n+ECHO\r\n+hello\r\n",
+            "*3\r\n+SET\r\n+mykey\r\n+foo\r\n",
+            "*2\r\n+GET\r\n+mykey\r\n",
+            "*3\r\n+SET\r\n+key\r\n:1\r\n",
+            "*3\r\n+SET\r\n+key\r\n:-10\r\n",
+            "*3\r\n+SET\r\n+key\r\n#t\r\n",
+            "*3\r\n+SET\r\n+key\r\n*3\r\n:-10\r\n+value\r\n#t\r\n",
         ]
 
         if len(inputs) != len(expected_outputs):
@@ -37,7 +67,7 @@ class TestRESPParser(unittest.TestCase):
             self.assertEqual(
                 output,
                 expected_outputs[i],
-                f"output: {output}, expected: {expected_outputs[i]}"
+                f"Failed {i}: output={output.encode('utf-8')}, expected={expected_outputs[i].encode('utf-8')}"
             )
 
     def test_resp_parser_decode(self):
@@ -105,7 +135,7 @@ class TestRESPParser(unittest.TestCase):
                 self.assertEqual(
                     output,
                     expected_outputs[i],
-                    f"output: {output}, expected: {expected_outputs[i]}"
+                    f"Failed {i}: output={output}, expected={expected_outputs[i]}"
                 )
 
 
