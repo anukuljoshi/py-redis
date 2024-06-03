@@ -40,62 +40,6 @@ class Decoder:
     def peekNextChar(self) -> str:
         return self.string[self.next]
 
-    def __decode_array(self) -> List[Any]:
-        """
-        helper function to decode array
-        """
-        # start of length integer
-        length = ""
-        while self.char != "\r":
-            length += self.char
-            self.readChar()
-
-        self.readChar()
-        self.readChar()
-
-        length = int(length)
-        result = []
-
-        for _ in range(length):
-            next_char = self.char
-
-            item = None
-            if next_char == TYPE_PREFIX.INTEGERS.value:
-                # int
-                self.readChar()
-                item = self.__decode_int()
-                self.readChar()
-                self.readChar()
-            elif next_char == TYPE_PREFIX.BOOLEAN.value:
-                # bool
-                self.readChar()
-                item = self.__decode_bool()
-                self.readChar()
-                self.readChar()
-            elif next_char == TYPE_PREFIX.BULK_STRING.value:
-                # string
-                self.readChar()
-                item = self.__decode_bulk_string()
-                self.readChar()
-                self.readChar()
-            elif next_char == TYPE_PREFIX.SIMPLE_STRING.value:
-                # string
-                self.readChar()
-                item = self.__decode_simple_string()
-                self.readChar()
-                self.readChar()
-            elif next_char == TYPE_PREFIX.ARRAY.value:
-                # list
-                # start of length integer
-                self.readChar()
-                item = self.__decode_array()
-            else:
-                raise ParserException(f"Unexpected {self.char}", self.current)
-
-            result.append(item)
-
-        return result
-
     def __decode_int(self) -> int:
         """
         helper function to decode integers
@@ -154,7 +98,7 @@ class Decoder:
 
     def __decode_bulk_string(self):
         """
-        helper function to decode string
+        helper function to decode bulk strings
 
         Returns:
             decoded string value
@@ -179,6 +123,62 @@ class Decoder:
             i += 1
 
         return "".join(result)
+
+    def __decode_array(self) -> List[Any]:
+        """
+        helper function to decode array
+
+        Returns:
+            decoded array value
+        """
+        # start of length integer
+        length = ""
+        while self.char != "\r":
+            length += self.char
+            self.readChar()
+
+        self.readChar()
+        self.readChar()
+
+        length = int(length)
+        result = []
+
+        for _ in range(length):
+            item = None
+            if self.char == TYPE_PREFIX.INTEGERS.value:
+                # int
+                self.readChar()
+                item = self.__decode_int()
+                self.readChar()
+                self.readChar()
+            elif self.char == TYPE_PREFIX.BOOLEAN.value:
+                # bool
+                self.readChar()
+                item = self.__decode_bool()
+                self.readChar()
+                self.readChar()
+            elif self.char == TYPE_PREFIX.BULK_STRING.value:
+                # string
+                self.readChar()
+                item = self.__decode_bulk_string()
+                self.readChar()
+                self.readChar()
+            elif self.char == TYPE_PREFIX.SIMPLE_STRING.value:
+                # string
+                self.readChar()
+                item = self.__decode_simple_string()
+                self.readChar()
+                self.readChar()
+            elif self.char == TYPE_PREFIX.ARRAY.value:
+                # list
+                self.readChar()
+                item = self.__decode_array()
+            else:
+                raise ParserException(f"Unexpected {self.char}", self.current)
+
+            result.append(item)
+
+        return result
 
     def decode(self):
         self.readChar()
