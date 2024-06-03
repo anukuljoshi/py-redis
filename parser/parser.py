@@ -91,7 +91,7 @@ class Decoder:
 
         value = ""
         while self.char != "\r":
-            if not self.char.isdigit():
+            if not self.char.isdigit() and self.char not in ["+", "-"]:
                 raise ParserException(f"Unexpected {self.char}", self.current)
             value += self.char
             self.readChar()
