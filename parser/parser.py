@@ -118,6 +118,22 @@ class Decoder:
 
         raise ParserException(f"Unexpected {self.char}", self.current)
 
+    def __decode_simple_string(self):
+        """
+        helper function to decode simple strings
+
+        Returns:
+            decoded string value
+        """
+
+        # start of length integer
+        string = ""
+        while self.char != "\r":
+            string += self.char
+            self.readChar()
+
+        return string
+
     def __decode_bulk_string(self):
         """
         helper function to decode string
@@ -171,7 +187,10 @@ class Decoder:
             self.readChar()
         elif self.char == TYPE_PREFIX.SIMPLE_STRING.value:
             # string
-            pass
+            self.readChar()
+            result = self.__decode_simple_string()
+            self.readChar()
+            self.readChar()
         elif self.char == TYPE_PREFIX.ARRAY.value:
             # list
             # start of length integer
