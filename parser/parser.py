@@ -21,22 +21,6 @@ class TYPE_PREFIX(Enum):
     PUSH = ">"
 
 
-class Value:
-    def __init__(
-        self,
-        typ: str,
-        integer: int,
-        string: str,
-        array: List,
-        null: bool
-    ) -> None:
-        self.typ = typ
-        self.integer = integer
-        self.string = string
-        self.array = array
-        self.null = null
-
-
 class Decoder:
     def __init__(self, string: str):
         self.current = 0
@@ -105,10 +89,8 @@ class Decoder:
                 # start of length integer
                 self.readChar()
                 item = self.__decode_array()
-            elif next_char == "\r" and self.peekNextChar() == "\n":
-                # skip two character \r\n
-                self.readChar()
-                self.readChar()
+            else:
+                raise ParserException(f"Unexpected {self.char}", self.current)
 
             result.append(item)
 
@@ -231,10 +213,14 @@ class Decoder:
             # list
             self.readChar()
             result = self.__decode_array()
-        elif self.char == "\r" and self.peekNextChar() == "\n":
-            # skip two character \r\n
-            self.readChar()
-            self.readChar()
+        else:
+            raise ParserException(f"Unexpected {self.char}", self.current)
+
+        if self.current != len(self.string):
+            raise ParserException(
+                f"Numbers of characters did not match: {self.string}",
+                self.current
+            )
 
         return result
 

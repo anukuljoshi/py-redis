@@ -63,6 +63,8 @@ class TestRESPParser(unittest.TestCase):
             "*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n*3\r\n:-10\r\n$5\r\nvalue\r\n#t\r\n",
             "*3\r\n*2\r\n*1\r\n:1\r\n*3\r\n#t\r\n:25\r\n+hello 123 world\r\n*1\r\n$7\r\nhello\r\n\r\n*3\r\n:-40\r\n+50\r\n:+60\r\n",
             "*1\r\n*2\r\n*1\r\n*1\r\n:1\r\n:12\r\n",
+            # exception
+            "*1\r\n:2\r\n3",
         ]
         expected_outputs = [
             5,
@@ -87,7 +89,8 @@ class TestRESPParser(unittest.TestCase):
                 [
                     [[1]],  12
                 ]
-            ]
+            ],
+            "ParserException",
         ]
 
         if len(inputs) != len(expected_outputs):
