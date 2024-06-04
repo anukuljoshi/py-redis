@@ -254,12 +254,15 @@ class Encoder:
             # boolean
             result.append(self.__encode_bool(command))
         elif type(command) is type(""):
-            if "\r" in command or "\n" in command:
-                # bulk string
-                result.append(self.__encode_bulk_string(command))
-            else:
-                # simple string
-                result.append(self.__encode_simple_string(command))
+            result.append(self.__encode_bulk_string(command))
+
+            # # use both simple strings and bulk strings
+            # if "\r" in command or "\n" in command:
+            #     # bulk string
+            #     result.append(self.__encode_bulk_string(command))
+            # else:
+            #     # simple string
+            #     result.append(self.__encode_simple_string(command))
         elif type(command) is type([]):
             # list
             result.append(self.__encode_array(command))
@@ -268,7 +271,7 @@ class Encoder:
 
 
 class RESPParser:
-    def encode(self, commands: Any) -> str:
+    def encode(self, commands: Any) -> bytes:
         """encode a list of command
 
             supported types: int, bool, str, list
@@ -279,8 +282,9 @@ class RESPParser:
             RESP encoded string
         """
         encoder = Encoder()
-        return encoder.encode(commands)
+        return encoder.encode(commands).encode("utf-8")
 
-    def decode(self, string: str):
+    def decode(self, bytes_string: bytes):
+        string = bytes_string.decode("utf-8")
         decoder = Decoder(string)
         return decoder.decode()
