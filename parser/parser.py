@@ -238,6 +238,9 @@ class Encoder:
     def __encode_bulk_string(self, command: str) -> str:
         return f"{TYPE_PREFIX.BULK_STRING.value}{len(command)}\r\n{command}\r\n"
 
+    def __encode_null_string(self) -> str:
+        return f"{TYPE_PREFIX.BULK_STRING.value}{-1}\r\n"
+
     def __encode_array(self, commands: List[Any]) -> str:
         result = [f"{TYPE_PREFIX.ARRAY.value}{len(commands)}\r\n"]
         for command in commands:
@@ -254,18 +257,18 @@ class Encoder:
             # boolean
             result.append(self.__encode_bool(command))
         elif type(command) is type(""):
-            result.append(self.__encode_bulk_string(command))
-
-            # # use both simple strings and bulk strings
-            # if "\r" in command or "\n" in command:
-            #     # bulk string
-            #     result.append(self.__encode_bulk_string(command))
-            # else:
-            #     # simple string
-            #     result.append(self.__encode_simple_string(command))
+            # use both simple strings and bulk strings
+            if "\r" in command or "\n" in command:
+                # bulk string
+                result.append(self.__encode_bulk_string(command))
+            else:
+                # simple string
+                result.append(self.__encode_simple_string(command))
         elif type(command) is type([]):
             # list
             result.append(self.__encode_array(command))
+        elif type(command) is type(None):
+            result.append(self.__encode_null_string())
 
         return "".join(result)
 
