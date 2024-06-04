@@ -35,27 +35,27 @@ class TestRESPParser(unittest.TestCase):
         ]
         expected_outputs = [
             # int
-            ":10\r\n",
-            ":-100\r\n",
-            ":50\r\n",
+            b":10\r\n",
+            b":-100\r\n",
+            b":50\r\n",
             # bool
-            "#t\r\n",
-            "#f\r\n",
+            b"#t\r\n",
+            b"#f\r\n",
             # simple string
-            "+foo\r\n",
-            "+bar\r\n",
-            "+12345\r\n",
+            b"+foo\r\n",
+            b"+bar\r\n",
+            b"+12345\r\n",
             # bulk string
-            "$12\r\nhello\r\nworld\r\n",
-            "$2\r\n\r\n\r\n",
+            b"$12\r\nhello\r\nworld\r\n",
+            b"$2\r\n\r\n\r\n",
             # array
-            "*2\r\n+ECHO\r\n+hello\r\n",
-            "*3\r\n+SET\r\n+mykey\r\n+foo\r\n",
-            "*2\r\n+GET\r\n+mykey\r\n",
-            "*3\r\n+SET\r\n+key\r\n:1\r\n",
-            "*3\r\n+SET\r\n+key\r\n:-10\r\n",
-            "*3\r\n+SET\r\n+key\r\n#t\r\n",
-            "*3\r\n+SET\r\n+key\r\n*3\r\n:-10\r\n+value\r\n#t\r\n",
+            b"*2\r\n+ECHO\r\n+hello\r\n",
+            b"*3\r\n+SET\r\n+mykey\r\n+foo\r\n",
+            b"*2\r\n+GET\r\n+mykey\r\n",
+            b"*3\r\n+SET\r\n+key\r\n:1\r\n",
+            b"*3\r\n+SET\r\n+key\r\n:-10\r\n",
+            b"*3\r\n+SET\r\n+key\r\n#t\r\n",
+            b"*3\r\n+SET\r\n+key\r\n*3\r\n:-10\r\n+value\r\n#t\r\n",
         ]
 
         if len(inputs) != len(expected_outputs):
@@ -67,34 +67,34 @@ class TestRESPParser(unittest.TestCase):
             self.assertEqual(
                 output,
                 expected_outputs[i],
-                f"Failed {i}: output={output.encode('utf-8')}, expected={expected_outputs[i].encode('utf-8')}"
+                f"Failed {i}: output={output}, expected={expected_outputs[i]}"
             )
 
     def test_resp_parser_decode(self):
         parser = RESPParser()
         inputs = [
             # int
-            ":5\r\n",
-            ":123\r\n",
-            ":1a5\r\n",
+            b":5\r\n",
+            b":123\r\n",
+            b":1a5\r\n",
             # bool
-            "#t\r\n",
-            "#f\r\n",
-            "#j\r\n",
+            b"#t\r\n",
+            b"#f\r\n",
+            b"#j\r\n",
             # simple strings
-            "+abcd\r\n",
-            "+hello\r\n",
+            b"+abcd\r\n",
+            b"+hello\r\n",
             # bulk strings
-            "$4\r\nabcd\r\n",
-            "$11\r\nhello world\r\n",
-            "$11\r\nhello\r\ntest\r\n",
+            b"$4\r\nabcd\r\n",
+            b"$11\r\nhello world\r\n",
+            b"$11\r\nhello\r\ntest\r\n",
             # list
-            "*3\r\n:12\r\n#t\r\n+hello\r\n",
-            "*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n*3\r\n:-10\r\n$5\r\nvalue\r\n#t\r\n",
-            "*3\r\n*2\r\n*1\r\n:1\r\n*3\r\n#t\r\n:25\r\n+hello 123 world\r\n*1\r\n$7\r\nhello\r\n\r\n*3\r\n:-40\r\n+50\r\n:+60\r\n",
-            "*1\r\n*2\r\n*1\r\n*1\r\n:1\r\n:12\r\n",
+            b"*3\r\n:12\r\n#t\r\n+hello\r\n",
+            b"*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n*3\r\n:-10\r\n$5\r\nvalue\r\n#t\r\n",
+            b"*3\r\n*2\r\n*1\r\n:1\r\n*3\r\n#t\r\n:25\r\n+hello 123 world\r\n*1\r\n$7\r\nhello\r\n\r\n*3\r\n:-40\r\n+50\r\n:+60\r\n",
+            b"*1\r\n*2\r\n*1\r\n*1\r\n:1\r\n:12\r\n",
             # exception
-            "*1\r\n:2\r\n3",
+            b"*1\r\n:2\r\n3",
         ]
         expected_outputs = [
             5,
