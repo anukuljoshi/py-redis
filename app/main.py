@@ -13,6 +13,10 @@ def handle_request(connection, parser):
     command = commands[0]
     args = commands[1:]
 
+    # TODO: remove after testing
+    print("command", command)
+    print("args", args)
+
     func = Command.get_action(command)
     response = func(parser, *args)
 

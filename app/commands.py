@@ -1,8 +1,12 @@
-from typing import Any
+import time
 
 from parser.parser import RESPParser
 
 STORE = dict()
+
+
+def get_current_time_ms():
+    return time.time() * 1000
 
 
 class CommandAction:
@@ -26,9 +30,25 @@ class CommandAction:
         key = args[0]
         value = args[1]
 
+        expiry = 0
+        if len(args) > 2:
+            format = args[2]
+            if not args[3].isdigit():
+                return parser.encode("Expiry time must be a number")
+
+            expiry = int(args[3])
+            if format.lower() == "ex":
+                # expiry is in seconds
+                expiry *= 1000
+
         if type(key) is not type(""):
             return parser.encode("Key must be a string")
-        STORE[key] = value
+
+        STORE[key] = {
+            "value": value,
+            "set_time": get_current_time_ms(),
+            "expiry": expiry
+        }
         return parser.encode("OK")
 
     @staticmethod
@@ -38,9 +58,27 @@ class CommandAction:
         if type(key) is not type(""):
             return parser.encode("Key must be a string")
 
-        value = STORE.get(key, None)
-        if value is None:
+        data = STORE.get(key, None)
+
+        # key not found
+        if data is None:
             return parser.encode(None)
+
+        # check for expiry
+        if data.get("expiry", 0) == 0:
+            value = data.get("value", None)
+            return parser.encode(value)
+
+        expiry = data.get("expiry", 0)
+        set_time = data.get("set_time", 0)
+        current_time = get_current_time_ms()
+
+        if current_time >= set_time + expiry:
+            # key expired
+            del STORE[key]
+            return parser.encode(None)
+
+        value = data.get("value")
         return parser.encode(value)
 
     @staticmethod
