@@ -22,14 +22,19 @@ class CommandAction:
         return parser.encode(message)
 
     @staticmethod
-    def set_action(parser: RESPParser, key: Any, value):
+    def set_action(parser: RESPParser, *args):
+        key = args[0]
+        value = args[1]
+
         if type(key) is not type(""):
             return parser.encode("Key must be a string")
         STORE[key] = value
         return parser.encode("OK")
 
     @staticmethod
-    def get_action(parser: RESPParser, key: str):
+    def get_action(parser: RESPParser, *args):
+        key = args[0]
+
         if type(key) is not type(""):
             return parser.encode("Key must be a string")
 
@@ -39,7 +44,19 @@ class CommandAction:
         return parser.encode(value)
 
     @staticmethod
-    def unknown_action(parser: RESPParser):
+    def exists_action(parser: RESPParser, *args):
+        keys = args
+
+        count = 0
+        for key in keys:
+            if key in STORE:
+                count += 1
+
+        return parser.encode(count)
+
+    @staticmethod
+    def unknown_action(parser: RESPParser, *args):
+        _ = args
         return parser.encode("Unknown Command")
 
 
@@ -48,6 +65,7 @@ class Command:
     ECHO = "echo"
     SET = "set"
     GET = "get"
+    EXISTS = "exists"
     UNKNOWN = "unknown"
 
     @staticmethod
@@ -60,5 +78,7 @@ class Command:
             return CommandAction.get_action
         elif command.lower() == Command.SET:
             return CommandAction.set_action
+        elif command.lower() == Command.EXISTS:
+            return CommandAction.exists_action
         else:
             return CommandAction.unknown_action
