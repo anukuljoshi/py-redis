@@ -93,6 +93,17 @@ class CommandAction:
         return parser.encode(count)
 
     @staticmethod
+    def info_action(parser: RESPParser, *args):
+        if len(args) != 1:
+            return parser.encode("INFO takes in one argument")
+
+        if args[0].lower() != "replication":
+            return parser.encode("argument must be 'replication'")
+
+        response = "# Replication\nrole:master"
+        return parser.encode(response)
+
+    @staticmethod
     def unknown_action(parser: RESPParser, *args):
         _ = args
         return parser.encode("Unknown Command")
@@ -104,6 +115,7 @@ class Command:
     SET = "set"
     GET = "get"
     EXISTS = "exists"
+    INFO = "info"
     UNKNOWN = "unknown"
 
     @staticmethod
@@ -118,5 +130,7 @@ class Command:
             return CommandAction.set_action
         elif command.lower() == Command.EXISTS:
             return CommandAction.exists_action
+        elif command.lower() == Command.INFO:
+            return CommandAction.info_action
         else:
             return CommandAction.unknown_action
