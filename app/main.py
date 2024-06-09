@@ -1,15 +1,16 @@
 import socket
 import threading
 from argparse import ArgumentParser
+from typing import Any, List
 
 from app.commands import Command
 from parser.parser import RESPParser
 
 
-def handle_request(connection, parser):
-    args_string = connection.recv(1024)
-
-    commands = parser.decode(args_string)
+def handle_command_action(parser: RESPParser, commands: List[Any]):
+    """
+    helper function to generate response for a command
+    """
 
     command = commands[0]
     args = commands[1:]
@@ -20,6 +21,16 @@ def handle_request(connection, parser):
 
     func = Command.get_action(command)
     response = func(parser, *args)
+    return response
+
+
+def handle_request(connection: socket.SocketType, parser: RESPParser):
+    args_string = connection.recv(1024)
+
+    commands = parser.decode_command(args_string)
+    response = handle_command_action(
+        parser, commands
+    )
 
     connection.sendall(response)
 
