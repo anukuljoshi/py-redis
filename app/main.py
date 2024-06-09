@@ -1,5 +1,6 @@
 import socket
 import threading
+from argparse import ArgumentParser
 
 from app.commands import Command
 from parser.parser import RESPParser
@@ -24,7 +25,23 @@ def handle_request(connection, parser):
 
 
 def main():
-    server_socket = socket.create_server(("localhost", 6379), reuse_port=True)
+    parser = ArgumentParser()
+    parser.add_argument(
+        "-p",
+        "--port",
+        dest="port",
+        type=int,
+        help="Port Number",
+        default=6379
+    )
+    args = parser.parse_args()
+
+    PORT = args.port
+
+    # TODO: remove after testing
+    print(f"Starting Server at localhost:{PORT}")
+
+    server_socket = socket.create_server(("localhost", PORT), reuse_port=True)
     resp_parser = RESPParser()
 
     while True:
