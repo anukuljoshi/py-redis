@@ -181,6 +181,11 @@ class Decoder:
         return result
 
     def decode(self):
+        """
+        general decode function
+        can decode all data types
+        """
+
         self.readChar()
 
         result = None
@@ -210,6 +215,32 @@ class Decoder:
             self.readChar()
             self.readChar()
         elif self.char == TYPE_PREFIX.ARRAY.value:
+            # list
+            self.readChar()
+            result = self.__decode_array()
+        else:
+            raise ParserException(f"Unexpected {self.char}", self.current)
+
+        if self.current != len(self.string):
+            raise ParserException(
+                f"Numbers of characters did not match: {self.string}",
+                self.current
+            )
+
+        return result
+
+    def decode_command_string(self) -> List[Any]:
+        """
+        function to decode a command string
+        can only be used to decode a string resulting in a list
+
+        NOTE: RESP command string will always result to a list
+        """
+
+        self.readChar()
+        result = None
+
+        if self.char == TYPE_PREFIX.ARRAY.value:
             # list
             self.readChar()
             result = self.__decode_array()
@@ -291,3 +322,8 @@ class RESPParser:
         string = bytes_string.decode("utf-8")
         decoder = Decoder(string)
         return decoder.decode()
+
+    def decode_command(self, bytes_string: bytes) -> List[Any]:
+        string = bytes_string.decode("utf-8")
+        decoder = Decoder(string)
+        return decoder.decode_command_string()

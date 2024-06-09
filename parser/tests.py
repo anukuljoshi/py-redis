@@ -138,6 +138,48 @@ class TestRESPParser(unittest.TestCase):
                     f"Failed {i}: output={output}, expected={expected_outputs[i]}"
                 )
 
+    def test_resp_parser_decode_command_string(self):
+        parser = RESPParser()
+        inputs = [
+            # list
+            b"*3\r\n:12\r\n#t\r\n+hello\r\n",
+            b"*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n*3\r\n:-10\r\n$5\r\nvalue\r\n#t\r\n",
+            b"*3\r\n*2\r\n*1\r\n:1\r\n*3\r\n#t\r\n:25\r\n+hello 123 world\r\n*1\r\n$7\r\nhello\r\n\r\n*3\r\n:-40\r\n+50\r\n:+60\r\n",
+            b"*1\r\n*2\r\n*1\r\n*1\r\n:1\r\n:12\r\n",
+            # exception
+            b"*1\r\n:2\r\n3",
+        ]
+        expected_outputs = [
+            [12, True, "hello"],
+            ["SET", "key", [-10, "value", True]],
+            [
+                [[1], [True, 25, "hello 123 world"]],
+                ["hello\r\n"],
+                [-40, "50", 60],
+            ],
+            [
+                [
+                    [[1]],  12
+                ]
+            ],
+            "ParserException",
+        ]
+
+        if len(inputs) != len(expected_outputs):
+            print("length of inputs and expected_outputs do not match")
+            return
+
+        for i in range(len(inputs)):
+            if expected_outputs[i] == "ParserException":
+                self.assertRaises(ParserException, parser.decode, inputs[i])
+            else:
+                output = parser.decode_command(inputs[i])
+                self.assertEqual(
+                    output,
+                    expected_outputs[i],
+                    f"Failed {i}: output={output}, expected={expected_outputs[i]}"
+                )
+
 
 if __name__ == '__main__':
     unittest.main()
