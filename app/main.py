@@ -4,10 +4,10 @@ from argparse import ArgumentParser
 from typing import Any, List
 
 from app.commands import Command
-from parser.parser import RESPParser
+from app.config import Config
 
 
-def handle_command_action(parser: RESPParser, commands: List[Any]):
+def handle_command_action(commands: List[Any]):
     """
     helper function to generate response for a command
     """
@@ -20,17 +20,18 @@ def handle_command_action(parser: RESPParser, commands: List[Any]):
     print("args", args)
 
     func = Command.get_action(command)
-    response = func(parser, *args)
+    response = func(*args)
     return response
 
 
-def handle_request(connection: socket.SocketType, parser: RESPParser):
+def handle_request(connection: socket.SocketType):
     args_string = connection.recv(1024)
 
+    # get parser object from config
+    parser = Config.get(Config.PARSER)
+
     commands = parser.decode_command(args_string)
-    response = handle_command_action(
-        parser, commands
-    )
+    response = handle_command_action(commands)
 
     connection.sendall(response)
 
@@ -45,20 +46,30 @@ def main():
         help="Port Number",
         default=6379
     )
+    parser.add_argument(
+        "--replicaof",
+        dest="port",
+        type=str,
+        help="Port Number",
+        default=""
+    )
     args = parser.parse_args()
 
     PORT = args.port
+    replicaof = args.replicaof
+
+    if replicaof != "":
+        Config.set(Config.ROLE, "slave")
 
     # TODO: remove after testing
-    print(f"Starting Server at localhost:{PORT}")
+    print(f"Starting {Config.get(Config.ROLE)} Server at localhost:{PORT}")
 
     server_socket = socket.create_server(("localhost", PORT), reuse_port=True)
-    resp_parser = RESPParser()
 
     while True:
         connection, _ = server_socket.accept()
         threading.Thread(
-            target=lambda: handle_request(connection, resp_parser)
+            target=lambda: handle_request(connection)
         ).start()
 
 
