@@ -46,7 +46,9 @@ def main():
 
     while True:
         connection, _ = server_socket.accept()
-        threading.Thread(target=lambda: handle_request(connection, resp_parser)).start()
+        threading.Thread(
+            target=lambda: handle_request(connection, resp_parser)
+        ).start()
 
 
 if __name__ == "__main__":
