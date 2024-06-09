@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from typing import Any, List
 
 from app.commands import Command
-from app.config import Config
+from app.config import Config, Info
 
 
 def handle_command_action(commands: List[Any]):
@@ -28,7 +28,7 @@ def handle_request(connection: socket.SocketType):
     args_string = connection.recv(1024)
 
     # get parser object from config
-    parser = Config.get(Config.PARSER)
+    parser = Config.get(Config.Keys.PARSER)
 
     commands = parser.decode_command(args_string)
     response = handle_command_action(commands)
@@ -48,9 +48,9 @@ def main():
     )
     parser.add_argument(
         "--replicaof",
-        dest="port",
+        dest="replicaof",
         type=str,
-        help="Port Number",
+        help="Address and port of the master server",
         default=""
     )
     args = parser.parse_args()
@@ -59,10 +59,10 @@ def main():
     replicaof = args.replicaof
 
     if replicaof != "":
-        Config.set(Config.ROLE, "slave")
+        Info.set(Info.Keys.ROLE, "slave")
 
     # TODO: remove after testing
-    print(f"Starting {Config.get(Config.ROLE)} Server at localhost:{PORT}")
+    print(f"Starting {Info.get(Info.Keys.ROLE)} Server at localhost:{PORT}")
 
     server_socket = socket.create_server(("localhost", PORT), reuse_port=True)
 

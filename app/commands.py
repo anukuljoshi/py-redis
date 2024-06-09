@@ -1,6 +1,6 @@
 import time
 
-from app.config import Config
+from app.config import Config, Info
 
 STORE = dict()
 
@@ -14,7 +14,7 @@ class CommandAction:
     defines different action corresponding to commands
     """
 
-    parser = Config.get(Config.PARSER)
+    parser = Config.get(Config.Keys.PARSER)
 
     @staticmethod
     def ping_action():
@@ -106,8 +106,12 @@ class CommandAction:
                 "argument must be 'replication'"
             )
 
-        response = "# Replication\nrole:master"
-        return CommandAction.parser.encode(response)
+        response = ["# Replication"]
+        items = Info.get_info()
+        for key, value in items.items():
+            response.append(f"{key}:{value}")
+
+        return CommandAction.parser.encode("\n".join(response))
 
     @staticmethod
     def unknown_action(*args):
