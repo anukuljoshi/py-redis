@@ -26,16 +26,23 @@ def handle_command_action(commands: List[Any]):
     return response
 
 
-def handle_request(connection: socket.SocketType):
-    args_string = connection.recv(1024)
+def handle_request(connection: socket.socket):
 
     # get parser object from config
     parser = Config.get(Config.Keys.PARSER)
 
-    commands = parser.decode_command(args_string)
-    response = handle_command_action(commands)
+    with connection:
+        connected = True
+        while connected:
+            args_string = connection.recv(1024)
+            connected = bool(args_string)
+            if not connected:
+                break
 
-    connection.sendall(response)
+            commands = parser.decode_command(args_string)
+            response = handle_command_action(commands)
+
+            connection.sendall(response)
 
 
 def main():
@@ -78,10 +85,17 @@ def main():
 
         # handshake
         # step 1: ping
-        master_sock.send(Command.ping_command())
-        # step 2: replconf twice
-        master_sock.send(Command.replconf_command("listening-port", args.port))
-        master_sock.send(Command.replconf_command("capa", "psync2"))
+        master_sock.sendall(Command.ping_command())
+
+        if "PONG" in master_sock.recv(1024).decode():
+            # step 2: replconf twice
+            master_sock.send(
+                Command.replconf_command("listening-port", str(args.port))
+            )
+        if "OK" in master_sock.recv(1024).decode():
+            master_sock.send(Command.replconf_command("capa", "psync2"))
+        if "OK" in master_sock.recv(1024).decode():
+            master_sock.close()
 
     # TODO: remove after testing
     print(f"Starting {Info.get(Info.Keys.ROLE)} Server at localhost:{PORT}")

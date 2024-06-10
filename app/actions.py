@@ -115,6 +115,14 @@ class Action:
         return Action.parser.encode("\n".join(response))
 
     @staticmethod
+    def replconf_action(*args):
+        if len(args) != 2:
+            return Action.parser.encode(
+                "args len must be 2"
+            )
+        return Action.parser.encode("OK")
+
+    @staticmethod
     def unknown_action(*args):
         _ = args
         return Action.parser.encode("Unknown Command")
@@ -135,5 +143,7 @@ class ActionGenerator:
             return Action.exists_action
         elif command.lower() == Command.INFO:
             return Action.info_action
+        elif command.lower() == Command.REPLCONF:
+            return Action.replconf_action
         else:
             return Action.unknown_action
