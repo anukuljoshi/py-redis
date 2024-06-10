@@ -1,6 +1,7 @@
 import unittest
 
-from app.config import Info
+from app.commands import Command
+from app.config import Config, Info
 from app.main import handle_command_action
 
 
@@ -24,6 +25,36 @@ class TestCommandActions(unittest.TestCase):
             self.assertTrue(
                 f"master_repl_offset:{Info.get(Info.Keys.MASTER_REPL_OFFSET)}" in response_string
             )
+
+    def test_command_generation(self):
+        commands = [
+            Command.ping_command(),
+            Command.echo_command("hello"),
+            Command.set_command("key", "value"),
+            Command.set_command("key", "value", "ex", "10"),
+            Command.get_command("key"),
+            Command.exists_command("key"),
+            Command.info_command("replication"),
+            Command.replconf_command("listening-port", "6380"),
+            Command.replconf_command("capa", "psync2"),
+        ]
+        expecteds = [
+            [Command.PING],
+            [Command.ECHO, "hello"],
+            [Command.SET, "key", "value"],
+            [Command.SET, "key", "value", "ex", "10"],
+            [Command.GET, "key"],
+            [Command.EXISTS, "key"],
+            [Command.INFO, "replication"],
+            [Command.REPLCONF, "listening-port", "6380"],
+            [Command.REPLCONF, "capa", "psync2"],
+        ]
+
+        for i in range(len(commands)):
+            command = commands[i]
+            expected = Config.get(Config.Keys.PARSER).encode(expecteds[i])
+
+            self.assertEqual(command, expected)
 
 
 if __name__ == '__main__':
