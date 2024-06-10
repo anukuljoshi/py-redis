@@ -84,7 +84,7 @@ class Command:
         return Command.parser.encode(command)
 
     @staticmethod
-    def exists_action(*args):
+    def exists_command(*args):
         if len(args) < 1:
             raise CommandException(
                 "args len must be greater than 1",
@@ -95,7 +95,7 @@ class Command:
         return Command.parser.encode(command)
 
     @staticmethod
-    def info_action(*args):
+    def info_command(*args):
         if len(args) != 1:
             raise CommandException(
                 "args len must be 1",
