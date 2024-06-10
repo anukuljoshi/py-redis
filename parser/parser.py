@@ -54,7 +54,7 @@ class Decoder:
         value = ""
         while self.char != "\r":
             if not self.char.isdigit() and self.char not in ["+", "-"]:
-                raise ParserException(f"Unexpected {self.char}", self.current)
+                raise ParserException(f"Unexpected {self.char} in {self.string}", self.current)
             value += self.char
             self.readChar()
 
@@ -78,7 +78,7 @@ class Decoder:
             self.readChar()
             return False
 
-        raise ParserException(f"Unexpected {self.char}", self.current)
+        raise ParserException(f"Unexpected {self.char} in {self.string}", self.current)
 
     def __decode_simple_string(self):
         """
@@ -174,7 +174,7 @@ class Decoder:
                 self.readChar()
                 item = self.__decode_array()
             else:
-                raise ParserException(f"Unexpected {self.char}", self.current)
+                raise ParserException(f"Unexpected {self.char} in {self.string}", self.current)
 
             result.append(item)
 
@@ -219,7 +219,7 @@ class Decoder:
             self.readChar()
             result = self.__decode_array()
         else:
-            raise ParserException(f"Unexpected {self.char}", self.current)
+            raise ParserException(f"Unexpected {self.char} in {self.string}", self.current)
 
         if self.current != len(self.string):
             raise ParserException(
@@ -245,7 +245,7 @@ class Decoder:
             self.readChar()
             result = self.__decode_array()
         else:
-            raise ParserException(f"Unexpected {self.char}", self.current)
+            raise ParserException(f"Unexpected {self.char} in {self.string}", self.current)
 
         if self.current != len(self.string):
             raise ParserException(
