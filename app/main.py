@@ -6,6 +6,7 @@ from typing import Any, List
 from app.actions import ActionGenerator
 from app.commands import Command
 from app.config import Config, Info
+from app.exceptions import CommandLineException
 
 
 def handle_command_action(commands: List[Any]):
@@ -61,6 +62,20 @@ def main():
 
     if replicaof != "":
         Info.set(Info.Keys.ROLE, "slave")
+        master_addr = replicaof.split(" ")
+        if len(master_addr) != 2:
+            raise CommandLineException(
+                "Usage - 'hostname port'",
+                flag="replicaof"
+            )
+        master_host = master_addr[0]
+        master_port = int(master_addr[1])
+        master_sock = socket.socket(
+            socket.AF_INET,
+            socket.SOCK_STREAM,
+        )
+        master_sock.connect((master_host, master_port))
+        master_sock.send(Command.ping_command())
 
     # TODO: remove after testing
     print(f"Starting {Info.get(Info.Keys.ROLE)} Server at localhost:{PORT}")
