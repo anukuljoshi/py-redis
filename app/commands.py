@@ -21,13 +21,15 @@ class Command:
     GET = "get"
     EXISTS = "exists"
     INFO = "info"
+    REPLCONF = "replconf"
     UNKNOWN = "unknown"
 
     @staticmethod
-    def ping_command():
+    def ping_command(*args):
         command = [
             Command.PING
         ]
+        command.extend(args)
         return Command.parser.encode(command)
 
     @staticmethod
@@ -37,7 +39,8 @@ class Command:
                 "args len must be 1",
                 Command.ECHO
             )
-        command = [Command.ECHO].extend(args)
+        command = [Command.ECHO]
+        command.extend(args)
         return Command.parser.encode(command)
 
     @staticmethod
@@ -62,7 +65,8 @@ class Command:
                     Command.SET
                 )
 
-        command = [Command.SET].extend(args)
+        command = [Command.SET]
+        command.extend(args)
         return Command.parser.encode(command)
 
     @staticmethod
@@ -80,7 +84,8 @@ class Command:
                 Command.GET
             )
 
-        command = [Command.GET].extend(args)
+        command = [Command.GET]
+        command.extend(args)
         return Command.parser.encode(command)
 
     @staticmethod
@@ -91,7 +96,8 @@ class Command:
                 Command.EXISTS
             )
 
-        command = [Command.EXISTS].extend(args)
+        command = [Command.EXISTS]
+        command.extend(args)
         return Command.parser.encode(command)
 
     @staticmethod
@@ -108,5 +114,17 @@ class Command:
                 Command.INFO
             )
 
-        command = [Command.INFO].extend(args)
+        command = [Command.INFO]
+        command.extend(args)
+        return Command.parser.encode(command)
+
+    @staticmethod
+    def replconf_command(*args):
+        if len(args) != 2:
+            raise CommandException(
+                "args len must be 2",
+                Command.REPLCONF
+            )
+        command = [Command.REPLCONF]
+        command.extend(args)
         return Command.parser.encode(command)

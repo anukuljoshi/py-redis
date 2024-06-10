@@ -75,7 +75,13 @@ def main():
             socket.SOCK_STREAM,
         )
         master_sock.connect((master_host, master_port))
+
+        # handshake
+        # step 1: ping
         master_sock.send(Command.ping_command())
+        # step 2: replconf twice
+        master_sock.send(Command.replconf_command("listening-port", args.port))
+        master_sock.send(Command.replconf_command("capa", "psync2"))
 
     # TODO: remove after testing
     print(f"Starting {Info.get(Info.Keys.ROLE)} Server at localhost:{PORT}")
