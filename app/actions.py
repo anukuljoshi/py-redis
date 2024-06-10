@@ -1,5 +1,6 @@
 import time
 
+from app.commands import Command
 from app.config import Config, Info
 
 STORE = dict()
@@ -120,27 +121,19 @@ class Action:
 
 
 class ActionGenerator:
-    PING = "ping"
-    ECHO = "echo"
-    SET = "set"
-    GET = "get"
-    EXISTS = "exists"
-    INFO = "info"
-    UNKNOWN = "unknown"
-
     @staticmethod
     def get_action(command: str):
-        if command.lower() == ActionGenerator.PING:
+        if command.lower() == Command.PING:
             return Action.ping_action
-        elif command.lower() == ActionGenerator.ECHO:
+        elif command.lower() == Command.ECHO:
             return Action.echo_action
-        elif command.lower() == ActionGenerator.GET:
+        elif command.lower() == Command.GET:
             return Action.get_action
-        elif command.lower() == ActionGenerator.SET:
+        elif command.lower() == Command.SET:
             return Action.set_action
-        elif command.lower() == ActionGenerator.EXISTS:
+        elif command.lower() == Command.EXISTS:
             return Action.exists_action
-        elif command.lower() == ActionGenerator.INFO:
+        elif command.lower() == Command.INFO:
             return Action.info_action
         else:
             return Action.unknown_action

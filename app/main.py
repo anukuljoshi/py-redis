@@ -3,7 +3,8 @@ import threading
 from argparse import ArgumentParser
 from typing import Any, List
 
-from app.commands import ActionGenerator
+from app.actions import ActionGenerator
+from app.commands import Command
 from app.config import Config, Info
 
 
