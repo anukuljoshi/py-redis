@@ -9,23 +9,23 @@ def get_current_time_ms():
     return time.time() * 1000
 
 
-class CommandAction:
+class Action:
     """
-    defines different action corresponding to commands
+    defines different actions corresponding to commands
     """
 
     parser = Config.get(Config.Keys.PARSER)
 
     @staticmethod
     def ping_action():
-        return CommandAction.parser.encode("PONG")
+        return Action.parser.encode("PONG")
 
     @staticmethod
     def echo_action(*args):
         if len(args) != 1:
-            return CommandAction.parser.encode("ECHO takes in 1 argument")
+            return Action.parser.encode("ECHO takes in 1 argument")
         message = args[0]
-        return CommandAction.parser.encode(message)
+        return Action.parser.encode(message)
 
     @staticmethod
     def set_action(*args):
@@ -36,7 +36,7 @@ class CommandAction:
         if len(args) > 2:
             format = args[2]
             if not args[3].isdigit():
-                return CommandAction.parser.encode(
+                return Action.parser.encode(
                     "Expiry time must be a number"
                 )
 
@@ -46,32 +46,32 @@ class CommandAction:
                 expiry *= 1000
 
         if type(key) is not type(""):
-            return CommandAction.parser.encode("Key must be a string")
+            return Action.parser.encode("Key must be a string")
 
         STORE[key] = {
             "value": value,
             "set_time": get_current_time_ms(),
             "expiry": expiry
         }
-        return CommandAction.parser.encode("OK")
+        return Action.parser.encode("OK")
 
     @staticmethod
     def get_action(*args):
         key = args[0]
 
         if type(key) is not type(""):
-            return CommandAction.parser.encode("Key must be a string")
+            return Action.parser.encode("Key must be a string")
 
         data = STORE.get(key, None)
 
         # key not found
         if data is None:
-            return CommandAction.parser.encode(None)
+            return Action.parser.encode(None)
 
         # check for expiry
         if data.get("expiry", 0) == 0:
             value = data.get("value", None)
-            return CommandAction.parser.encode(value)
+            return Action.parser.encode(value)
 
         expiry = data.get("expiry", 0)
         set_time = data.get("set_time", 0)
@@ -80,10 +80,10 @@ class CommandAction:
         if current_time >= set_time + expiry:
             # key expired
             del STORE[key]
-            return CommandAction.parser.encode(None)
+            return Action.parser.encode(None)
 
         value = data.get("value")
-        return CommandAction.parser.encode(value)
+        return Action.parser.encode(value)
 
     @staticmethod
     def exists_action(*args):
@@ -94,15 +94,15 @@ class CommandAction:
             if key in STORE:
                 count += 1
 
-        return CommandAction.parser.encode(count)
+        return Action.parser.encode(count)
 
     @staticmethod
     def info_action(*args):
         if len(args) != 1:
-            return CommandAction.parser.encode("INFO takes in one argument")
+            return Action.parser.encode("INFO takes in one argument")
 
         if args[0].lower() != "replication":
-            return CommandAction.parser.encode(
+            return Action.parser.encode(
                 "argument must be 'replication'"
             )
 
@@ -111,15 +111,15 @@ class CommandAction:
         for key, value in items.items():
             response.append(f"{key}:{value}")
 
-        return CommandAction.parser.encode("\n".join(response))
+        return Action.parser.encode("\n".join(response))
 
     @staticmethod
     def unknown_action(*args):
         _ = args
-        return CommandAction.parser.encode("Unknown Command")
+        return Action.parser.encode("Unknown Command")
 
 
-class Command:
+class ActionGenerator:
     PING = "ping"
     ECHO = "echo"
     SET = "set"
@@ -130,17 +130,17 @@ class Command:
 
     @staticmethod
     def get_action(command: str):
-        if command.lower() == Command.PING:
-            return CommandAction.ping_action
-        elif command.lower() == Command.ECHO:
-            return CommandAction.echo_action
-        elif command.lower() == Command.GET:
-            return CommandAction.get_action
-        elif command.lower() == Command.SET:
-            return CommandAction.set_action
-        elif command.lower() == Command.EXISTS:
-            return CommandAction.exists_action
-        elif command.lower() == Command.INFO:
-            return CommandAction.info_action
+        if command.lower() == ActionGenerator.PING:
+            return Action.ping_action
+        elif command.lower() == ActionGenerator.ECHO:
+            return Action.echo_action
+        elif command.lower() == ActionGenerator.GET:
+            return Action.get_action
+        elif command.lower() == ActionGenerator.SET:
+            return Action.set_action
+        elif command.lower() == ActionGenerator.EXISTS:
+            return Action.exists_action
+        elif command.lower() == ActionGenerator.INFO:
+            return Action.info_action
         else:
-            return CommandAction.unknown_action
+            return Action.unknown_action

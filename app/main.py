@@ -3,7 +3,7 @@ import threading
 from argparse import ArgumentParser
 from typing import Any, List
 
-from app.commands import Command
+from app.commands import ActionGenerator
 from app.config import Config, Info
 
 
@@ -19,7 +19,7 @@ def handle_command_action(commands: List[Any]):
     print("command", command)
     print("args", args)
 
-    func = Command.get_action(command)
+    func = ActionGenerator.get_action(command)
     response = func(*args)
     return response
 
