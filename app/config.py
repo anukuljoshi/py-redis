@@ -1,12 +1,23 @@
+from random import choice
+from string import ascii_lowercase, digits
+
 from parser.parser import RESPParser
+
+
+def generate_random_string(size: int) -> str:
+    return "".join(choice(ascii_lowercase+digits) for _ in range(size))
 
 
 class Info:
     class Keys:
         ROLE = "role"
+        MASTER_REPL_ID = "master_replid"
+        MASTER_REPL_OFFSET = "master_repl_offset"
 
     __info = {
-        "role": "master"
+        "role": "master",
+        "master_replid": generate_random_string(40),
+        "master_repl_offset": 0,
     }
     __setters = ["role"]
 
