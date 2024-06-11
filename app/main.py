@@ -86,16 +86,41 @@ def main():
         # handshake
         # step 1: ping
         master_sock.sendall(Command.ping_command())
-
-        if "PONG" in master_sock.recv(1024).decode():
-            # step 2: replconf twice
-            master_sock.send(
-                Command.replconf_command("listening-port", str(args.port))
+        response = master_sock.recv(1024).decode()
+        # TODO: remove after testing
+        print("step 1 ping: ", response)
+        if "PONG" not in response:
+            raise RuntimeError(
+                "handshake error: ping failed"
             )
-        if "OK" in master_sock.recv(1024).decode():
-            master_sock.send(Command.replconf_command("capa", "psync2"))
-        if "OK" in master_sock.recv(1024).decode():
-            master_sock.close()
+
+        # step 2: replconf twice
+        master_sock.send(
+            Command.replconf_command("listening-port", str(args.port))
+        )
+        response = master_sock.recv(1024).decode()
+        # TODO: remove after testing
+        print("step 2:1 replconf: ", response)
+        if "OK" not in response:
+            raise RuntimeError(
+                "handshake error: first replconf failed"
+            )
+        master_sock.send(Command.replconf_command("capa", "psync2"))
+        response = master_sock.recv(1024).decode()
+        # TODO: remove after testing
+        print("step 2:2 replconf: ", response)
+        if "OK" not in response:
+            raise RuntimeError(
+                "handshake error: second replconf failed"
+            )
+
+        # step 3: psync command
+        master_sock.send(
+            Command.psync_command("?", "-1")
+        )
+        response = master_sock.recv(1024).decode()
+        # TODO: remove after testing
+        print("step 3: psync: ", response)
 
     # TODO: remove after testing
     print(f"Starting {Info.get(Info.Keys.ROLE)} Server at localhost:{PORT}")

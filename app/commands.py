@@ -22,6 +22,7 @@ class Command:
     EXISTS = "exists"
     INFO = "info"
     REPLCONF = "replconf"
+    PSYNC = "psync"
     UNKNOWN = "unknown"
 
     @staticmethod
@@ -126,5 +127,16 @@ class Command:
                 Command.REPLCONF
             )
         command = [Command.REPLCONF]
+        command.extend(args)
+        return Command.parser.encode(command)
+
+    @staticmethod
+    def psync_command(*args):
+        if len(args) != 2:
+            raise CommandException(
+                "args len must be 2",
+                Command.PSYNC
+            )
+        command = [Command.PSYNC]
         command.extend(args)
         return Command.parser.encode(command)

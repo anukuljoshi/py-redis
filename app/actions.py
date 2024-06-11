@@ -123,6 +123,16 @@ class Action:
         return Action.parser.encode("OK")
 
     @staticmethod
+    def psync_action(*args):
+        if len(args) != 2:
+            return Action.parser.encode(
+                "args len must be 2"
+            )
+        return Action.parser.encode(
+            f"FULLRESYNC {Info.get(Info.Keys.MASTER_REPL_ID)} 0"
+        )
+
+    @staticmethod
     def unknown_action(*args):
         _ = args
         return Action.parser.encode("Unknown Command")
@@ -145,5 +155,7 @@ class ActionGenerator:
             return Action.info_action
         elif command.lower() == Command.REPLCONF:
             return Action.replconf_action
+        elif command.lower() == Command.PSYNC:
+            return Action.psync_action
         else:
             return Action.unknown_action
