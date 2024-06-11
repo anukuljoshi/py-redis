@@ -288,14 +288,14 @@ class Encoder:
             # boolean
             result.append(self.__encode_bool(command))
         elif type(command) is type(""):
-            result.append(self.__encode_bulk_string(command))
-            # # use both simple strings and bulk strings
-            # if "\r" in command or "\n" in command:
-            #     # bulk string
-            #     result.append(self.__encode_bulk_string(command))
-            # else:
-            #     # simple string
-            #     result.append(self.__encode_simple_string(command))
+            # result.append(self.__encode_bulk_string(command))
+            # use both simple strings and bulk strings
+            if "\r" in command or "\n" in command:
+                # bulk string
+                result.append(self.__encode_bulk_string(command))
+            else:
+                # simple string
+                result.append(self.__encode_simple_string(command))
         elif type(command) is type([]):
             # list
             result.append(self.__encode_array(command))
