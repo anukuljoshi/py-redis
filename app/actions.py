@@ -128,8 +128,10 @@ class Action:
             return Action.parser.encode(
                 "args len must be 2"
             )
+        master_repl_id = Info.get(Info.Keys.MASTER_REPL_ID)
+        master_repl_offset = Info.get(Info.Keys.MASTER_REPL_OFFSET)
         return Action.parser.encode(
-            f"FULLRESYNC {Info.get(Info.Keys.MASTER_REPL_ID)} 0"
+            f"FULLRESYNC {master_repl_id} {master_repl_offset}"
         )
 
     @staticmethod
