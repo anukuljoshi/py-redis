@@ -42,11 +42,13 @@ class Info:
 class Config:
     class Keys:
         PARSER = "parser"
+        PORT = "port"
 
     __config = {
         "parser": RESPParser(),
+        "port": 6379,
     }
-    __setters = []
+    __setters = ["port"]
 
     @staticmethod
     def get(name):
