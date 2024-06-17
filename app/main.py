@@ -58,12 +58,12 @@ def main():
     Config.set(Config.Keys.PORT, args.port)
 
     # TODO: remove after testing
-    print(f"Starting {Info.get(Info.Keys.ROLE)} Server at localhost:{Config.set(Config.Keys.PORT, args.port)}")
+    print(f"Starting {Info.get(Info.Keys.ROLE)} Server at localhost:{Config.get(Config.Keys.PORT)}")
 
     server_socket = socket.create_server(
         (
             "localhost",
-            Config.set(Config.Keys.PORT, args.port)
+            Config.get(Config.Keys.PORT)
         ),
         reuse_port=True
     )
