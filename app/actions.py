@@ -1,4 +1,5 @@
 import time
+from typing import Any
 
 from app.commands import Command
 from app.config import Config, Info
@@ -8,6 +9,23 @@ STORE = dict()
 
 def get_current_time_ms():
     return time.time() * 1000
+
+
+def get_type_string(value: Any):
+    if type(value) is type(1):
+        # int
+        return "int"
+    elif type(value) is type(True):
+        # boolean
+        return "bool"
+    elif type(value) is type(""):
+        return "string"
+    elif type(value) is type([]):
+        # list
+        return "array"
+    elif type(value) is type(None):
+        return "none"
+    return "unknown"
 
 
 class Action:
@@ -115,29 +133,23 @@ class Action:
         return Action.parser.encode("\n".join(response))
 
     @staticmethod
-    def replconf_action(*args):
-        if len(args) != 2:
-            return Action.parser.encode(
-                "args len must be 2"
-            )
-        return Action.parser.encode("OK")
-
-    @staticmethod
-    def psync_action(*args):
-        if len(args) != 2:
-            return Action.parser.encode(
-                "args len must be 2"
-            )
-        master_repl_id = Info.get(Info.Keys.MASTER_REPL_ID)
-        master_repl_offset = Info.get(Info.Keys.MASTER_REPL_OFFSET)
-        return Action.parser.encode(
-            f"FULLRESYNC {master_repl_id} {master_repl_offset}"
-        )
-
-    @staticmethod
     def unknown_action(*args):
         _ = args
         return Action.parser.encode("Unknown Command")
+
+    @staticmethod
+    def type_action(*args):
+        if len(args) != 1:
+            return Action.parser.encode("TYPE takes in one argument")
+
+        key = args[0]
+        value_obj = STORE.get(key, None)
+        if value_obj is None:
+            return Action.parser.encode("none")
+
+        value = value_obj["value"]
+        value_type = get_type_string(value)
+        return Action.parser.encode(value_type)
 
 
 class ActionGenerator:
@@ -155,9 +167,7 @@ class ActionGenerator:
             return Action.exists_action
         elif command.lower() == Command.INFO:
             return Action.info_action
-        elif command.lower() == Command.REPLCONF:
-            return Action.replconf_action
-        elif command.lower() == Command.PSYNC:
-            return Action.psync_action
+        elif command.lower() == Command.TYPE:
+            return Action.type_action
         else:
             return Action.unknown_action

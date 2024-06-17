@@ -21,8 +21,7 @@ class Command:
     GET = "get"
     EXISTS = "exists"
     INFO = "info"
-    REPLCONF = "replconf"
-    PSYNC = "psync"
+    TYPE = "type"
     UNKNOWN = "unknown"
 
     @staticmethod
@@ -120,23 +119,13 @@ class Command:
         return Command.parser.encode(command)
 
     @staticmethod
-    def replconf_command(*args):
-        if len(args) != 2:
+    def type_command(*args):
+        if len(args) != 1:
             raise CommandException(
-                "args len must be 2",
-                Command.REPLCONF
+                "args len must be 1",
+                Command.TYPE
             )
-        command = [Command.REPLCONF]
-        command.extend(args)
-        return Command.parser.encode(command)
 
-    @staticmethod
-    def psync_command(*args):
-        if len(args) != 2:
-            raise CommandException(
-                "args len must be 2",
-                Command.PSYNC
-            )
-        command = [Command.PSYNC]
+        command = [Command.TYPE]
         command.extend(args)
         return Command.parser.encode(command)

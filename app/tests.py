@@ -35,8 +35,6 @@ class TestCommandActions(unittest.TestCase):
             Command.get_command("key"),
             Command.exists_command("key"),
             Command.info_command("replication"),
-            Command.replconf_command("listening-port", "6380"),
-            Command.replconf_command("capa", "psync2"),
         ]
         expecteds = [
             [Command.PING],
@@ -46,8 +44,6 @@ class TestCommandActions(unittest.TestCase):
             [Command.GET, "key"],
             [Command.EXISTS, "key"],
             [Command.INFO, "replication"],
-            [Command.REPLCONF, "listening-port", "6380"],
-            [Command.REPLCONF, "capa", "psync2"],
         ]
 
         for i in range(len(commands)):
