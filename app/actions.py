@@ -51,7 +51,10 @@ class Action:
         key = args[0]
         value = args[1]
 
-        expiry = 0
+        if type(key) is not type(""):
+            return Action.parser.encode("Key must be a string")
+
+        expiry = -1
         if len(args) > 2:
             format = args[2]
             if not args[3].isdigit():
@@ -64,13 +67,18 @@ class Action:
                 # expiry is in seconds
                 expiry *= 1000
 
-        if type(key) is not type(""):
-            return Action.parser.encode("Key must be a string")
+            if expiry < 0:
+                return Action.parser.encode(
+                    "Expiry time must be a positive number"
+                )
+
+        expiry_time = 0
+        if expiry != -1:
+            expiry_time = get_current_time_ms() + expiry
 
         STORE[key] = {
             "value": value,
-            "set_time": get_current_time_ms(),
-            "expiry": expiry
+            "expiry_time": expiry_time
         }
         return Action.parser.encode("OK")
 
@@ -88,15 +96,14 @@ class Action:
             return Action.parser.encode(None)
 
         # check for expiry
-        if data.get("expiry", 0) == 0:
+        if data.get("expiry_time", 0) == 0:
             value = data.get("value", None)
             return Action.parser.encode(value)
 
-        expiry = data.get("expiry", 0)
-        set_time = data.get("set_time", 0)
+        expiry_time = data.get("expiry_time", 0)
         current_time = get_current_time_ms()
 
-        if current_time >= set_time + expiry:
+        if current_time >= expiry_time:
             # key expired
             del STORE[key]
             return Action.parser.encode(None)
